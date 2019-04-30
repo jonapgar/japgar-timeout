@@ -10,14 +10,18 @@ module.exports = (promise,t=5000,err='Something took too long',def,loglevel='not
 			res('Timeout canceled')
 		}
 	})
-	let race = Promise.race([promise,cancelPromise])
-	promise.then(cancel).catch(zzz[loglevel]) //this could/should get warned errored on elsewhere
-	if (def!==undefined) {
-		return race.catch(e=>{
-			zzz.warn(e)
+	promise.then(cancel)
+	promise.catch(cancel)
+	if(def!==undefined) {
+		cancelPromise = cancelPromise.catch(e=>{
+			zzz[loglevel](e)
 			return def
 		})
-	} else {
-		return race
+		promise = promise.catch(e=>{
+			zzz[loglevel](e)
+			return def
+		})
 	}
+	return Promise.race([promise,cancelPromise])
+	
 }
